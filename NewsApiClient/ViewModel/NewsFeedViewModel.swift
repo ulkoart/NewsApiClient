@@ -20,20 +20,43 @@ enum TypesOfNewsFeedSections: Int {
 
 final class NewsFeedViewModel {
     
-    init() {
-        loadNews(categories: [.general])
-    }
-    
-    let nc = NotificationCenter.default
-    
+    private let nc = NotificationCenter.default
     private var selectedIndexPath: IndexPath?
     private var articles = [Article]()
     private var page: Int = 1
     
+    var selectedСategories: [NewsCategory:Bool]! {
+        didSet {
+            let encoder = JSONEncoder()
+            if let encoded = try? encoder.encode(selectedСategories) {
+                UserDefaults.standard.set(encoded, forKey: "selectedСategories")
+            }
+        }
+    }
+    
+    init() {
+        if let selectedСategories = UserDefaults.standard.data(forKey: "selectedСategories") {
+            let decoder = JSONDecoder()
+            if let decoded = try? decoder.decode([NewsCategory:Bool].self, from: selectedСategories) {
+                self.selectedСategories = decoded
+            } else {
+                self.selectedСategories = Dictionary(uniqueKeysWithValues: NewsCategory.allCases.map { ($0, $0.isDefault) })
+            }
+        } else {
+            self.selectedСategories = Dictionary(uniqueKeysWithValues: NewsCategory.allCases.map { ($0, $0.isDefault) })
+        }
+        
+        let categories = self.selectedСategories
+            .filter { $0.value }
+            .keys.map { $0 }
+ 
+        loadNews(categories: categories)
+    }
+    
     func getNumberOfRowsInSection(section: Int) -> Int {
         guard
             let typesOfNewsFeedSections: TypesOfNewsFeedSections = TypesOfNewsFeedSections.init(rawValue: section)
-        else { fatalError() }
+            else { fatalError() }
         
         switch typesOfNewsFeedSections {
         case .newsCategory:
@@ -51,7 +74,7 @@ final class NewsFeedViewModel {
         
         guard
             let typesOfNewsFeedSections: TypesOfNewsFeedSections = TypesOfNewsFeedSections.init(rawValue: section)
-        else { fatalError() }
+            else { fatalError() }
         
         switch typesOfNewsFeedSections {
         case .newsCategory:
@@ -80,10 +103,12 @@ final class NewsFeedViewModel {
     }
     
     func addCategory(_ category:NewsCategory) {
+        selectedСategories[category] = true
         loadNews(categories: [category])
     }
     
     func removeCategory(_ category:NewsCategory) {
+        selectedСategories[category] = false
         articles = articles .filter { $0.category != category }
         self.nc.post(name: .newsUpdated, object: self)
     }

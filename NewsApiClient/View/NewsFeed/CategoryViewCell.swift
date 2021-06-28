@@ -13,10 +13,7 @@ final class CategoryViewCell: UITableViewCell {
     static let reuseIdentifier: String = "CategoryViewCell"
     var changingCategoriesDelegat: ChangingCategoriesDelegat?
     
-    private var selectedСategories: [NewsCategory:Bool] = {
-        let selectedСategories = Dictionary(uniqueKeysWithValues: NewsCategory.allCases.map { ($0, $0.isDefault) })
-        return selectedСategories
-    }()
+    private var selectedСategories: [NewsCategory:Bool]!
     
     private let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -47,6 +44,10 @@ final class CategoryViewCell: UITableViewCell {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setup(selectedСategories: [NewsCategory:Bool]) {
+        self.selectedСategories = selectedСategories
     }
     
 }

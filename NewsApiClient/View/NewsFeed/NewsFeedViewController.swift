@@ -82,6 +82,8 @@ extension NewsFeedViewController: UITableViewDelegate, UITableViewDataSource {
                 fatalError()
             }
             cell.changingCategoriesDelegat = self
+            
+            cell.setup(selectedСategories: viewModel.selectedСategories)
             return cell
         case 1:
             guard let cell = tableView.dequeueReusableCell(withIdentifier: NewsFeedTableViewCell.reuseIdentifier, for: indexPath) as? NewsFeedTableViewCell else {
@@ -108,6 +110,7 @@ extension NewsFeedViewController: UITableViewDelegate, UITableViewDataSource {
 
 extension NewsFeedViewController: ChangingCategoriesDelegat {
     func categoryHasChanged(category: NewsCategory, select: Bool) {
+        
         if select {
             viewModel.addCategory(category)
         } else {
