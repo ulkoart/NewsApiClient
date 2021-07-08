@@ -78,13 +78,11 @@ extension NewsFeedViewController: UITableViewDelegate, UITableViewDataSource {
         switch indexPath.section {
         
         case 0:
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: CategoryViewCell.reuseIdentifier, for: indexPath) as? CategoryViewCell else {
-                fatalError()
-            }
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: CategoryViewCell.reuseIdentifier, for: indexPath) as? CategoryViewCell else { fatalError() }
             cell.changingCategoriesDelegat = self
-            
             cell.setup(selectedСategories: viewModel.selectedСategories)
             return cell
+        
         case 1:
             guard let cell = tableView.dequeueReusableCell(withIdentifier: NewsFeedTableViewCell.reuseIdentifier, for: indexPath) as? NewsFeedTableViewCell else {
                 fatalError()
@@ -101,7 +99,7 @@ extension NewsFeedViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        if viewModel.isNewsLast(indexPath.row) {
+        if viewModel.isNewsLast(indexPath.row) && !viewModel.isLoading {
             footerSpinner.startAnimating()
             viewModel.loadMoreNews()
         }

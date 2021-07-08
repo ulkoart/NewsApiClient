@@ -21,10 +21,15 @@ enum TypesOfNewsFeedSections: Int {
 final class NewsFeedViewModel {
     
     private let nc = NotificationCenter.default
-    private var selectedIndexPath: IndexPath?
     private var articles = [Article]()
     private var page: Int = 1
     
+    var isLoading: Bool = false
+    var pageСategories: [NewsCategory:Int] = {
+        var pageСategories: [NewsCategory:Int] = [:]
+        NewsCategory.allCases.forEach { pageСategories[$0] = 1 }
+        return pageСategories
+    }()
     var selectedСategories: [NewsCategory:Bool]! {
         didSet {
             let encoder = JSONEncoder()
@@ -85,9 +90,10 @@ final class NewsFeedViewModel {
     }
     
     func loadNews(categories: [NewsCategory]) {
-        
         categories.forEach {
-            NewsApiService.getTopHeadlines(page: self.page, category: $0) { [unowned self] (articles, error, category) in
+            guard let page = pageСategories[$0] else { return }
+            isLoading = true
+            NewsApiService.getTopHeadlines(page: page, category: $0) { [unowned self] (articles, error, category) in
                 if let articles = articles {
                     
                     guard
@@ -97,6 +103,7 @@ final class NewsFeedViewModel {
 
                     self.articles.append(contentsOf: articles)
                     self.articles.sort { $0.publishedAt! > $1.publishedAt! }
+                    self.isLoading = false
                     self.nc.post(name: .newsUpdated, object: self)
                 }
             }
@@ -104,8 +111,16 @@ final class NewsFeedViewModel {
     }
     
     func loadMoreNews() {
-        // self.page+=1
-        // loadNews()
+        let categories = self.selectedСategories
+            .filter { $0.value }
+            .keys.map { $0 }
+        
+        categories.forEach {
+            guard let value = self.pageСategories[$0] else { return }
+            self.pageСategories.updateValue(value + 1, forKey: $0)
+        }
+
+        loadNews(categories: categories)
     }
     
     func addCategory(_ category:NewsCategory) {
@@ -116,6 +131,7 @@ final class NewsFeedViewModel {
     func removeCategory(_ category:NewsCategory) {
         selectedСategories[category] = false
         articles = articles .filter { $0.category != category }
+        pageСategories.updateValue(1, forKey: category)
         self.nc.post(name: .newsUpdated, object: self)
     }
     

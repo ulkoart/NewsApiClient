@@ -34,7 +34,7 @@ final class NewsApiService {
         var request = URLRequest(url: self.Endpoints.topHeadlines(page, category).url)
         request.timeoutInterval = 5
         
-        print(self.Endpoints.topHeadlines(page, category).url.absoluteURL)
+        // print(self.Endpoints.topHeadlines(page, category).url.absoluteURL)
         
         let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
             guard let data = data else {
