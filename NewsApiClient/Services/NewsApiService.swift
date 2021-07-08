@@ -29,7 +29,7 @@ final class NewsApiService {
         }
     }
     
-    static func getTopHeadlines(page: Int, category: NewsCategory, completionHandler: @escaping ([Article]?, Error?) -> Void) {
+    static func getTopHeadlines(page: Int, category: NewsCategory, completionHandler: @escaping ([Article]?, Error?, NewsCategory) -> Void) {
         
         var request = URLRequest(url: self.Endpoints.topHeadlines(page, category).url)
         request.timeoutInterval = 5
@@ -38,7 +38,7 @@ final class NewsApiService {
         
         let task = URLSession.shared.dataTask(with: request) { (data, response, error) in
             guard let data = data else {
-                completionHandler(nil, error)
+                completionHandler(nil, error, category)
                 return
             }
             do {
@@ -55,9 +55,9 @@ final class NewsApiService {
                     articles[index].category = category
                 }
                 
-                completionHandler(articles, nil)
+                completionHandler(articles, nil, category)
             } catch let error {
-                completionHandler(nil, error)
+                completionHandler(nil, error, category)
             }
         }
         task.resume()

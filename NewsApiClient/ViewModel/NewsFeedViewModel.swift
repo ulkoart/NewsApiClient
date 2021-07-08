@@ -87,8 +87,14 @@ final class NewsFeedViewModel {
     func loadNews(categories: [NewsCategory]) {
         
         categories.forEach {
-            NewsApiService.getTopHeadlines(page: self.page, category: $0) { [unowned self] (articles, error) in
+            NewsApiService.getTopHeadlines(page: self.page, category: $0) { [unowned self] (articles, error, category) in
                 if let articles = articles {
+                    
+                    guard
+                        let categoryIsSelected = self.selectedСategories[category],
+                        categoryIsSelected
+                    else { return }
+
                     self.articles.append(contentsOf: articles)
                     self.articles.sort { $0.publishedAt! > $1.publishedAt! }
                     self.nc.post(name: .newsUpdated, object: self)
